@@ -25,7 +25,7 @@ generate_square(Max) ->
 
 
 solve(Puz) ->
-	solve_worker(Puz, []).
+	analyze_and_solve(Puz, []).
 
 %% replace the nth element of a list with a new element (Val)
 set_nth(N, Val, List) ->
@@ -36,6 +36,8 @@ set_nth(N, Val, List) ->
 blacken_square({Val, white}) ->
 	{Val, black}.
 
+blacken_coord(Puz, {X,Y}) ->
+	blacken_coord(Puz, X, Y).
 
 blacken_coord(Puz, X, Y) ->
 	Xrow = lists:nth(X, Puz),
@@ -50,13 +52,23 @@ blacken_coord(Puz, X, Y) ->
 
 %% Ineligible will be a coordinate tuple {x, y}, indicating that this route did not work
 %% in this configuration and so should not be attempted
-solve_worker(Puz, Ineligible) ->
+analyze_and_solve(Puz, Ineligible) ->
 	case find_offending_squares(Puz) of
 		[] -> Puz; %% No offending squares meens it's solved
-		Offenders -> solve_workerblacken_and_continue(Offenders -- Ineligible)
+		Offenders -> solve_worker(Puz, Offenders -- Ineligible, Ineligible)
 	end.
 
-solve_worker(Puz, Offenders, Ineligible) ->
+solve_worker(_Puz, [], _) ->
+	%% If this is called with no offenders, that means it was unable to find a path
+	%% so let's return undefined to let the caller know that we failed
+	undefined;
+solve_worker(Puz, [FirstOffender | Offenders], Ineligible) ->
+	case is_next_to_black(Puz, FirstOffender) of
+		true -> solve_worker(Puz, Offenders, [FirstOffender | Ineligible]);
+		false -> 
+			NewPuz = blacken_coord(Puz,FirstOffender),
+			analyze_and_solve(NewPuz, Ineligible)
+	end.
 
 %% Returns a list of squares which are part of duplicated rows or columns.
 %% Is a list of coordinates {X, Y}
@@ -119,7 +131,7 @@ count_white_copies(List, Val) ->
 	length([N || {N, white} <- List, N==Val]).
 
 
-is_next_to_black(Puz, X, Y) ->
+is_next_to_black(Puz, {X, Y}) ->
 	is_black(Puz, X-1,Y) orelse 
 	is_black(Puz, X+1,Y) orelse 
 	is_black(Puz, X, Y-1) orelse 
