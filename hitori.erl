@@ -1,17 +1,23 @@
+%% hitori-erl
+%% Hitori solver in Erlang
+%% (c) 2012 by Jesse Gumm
+%% See MIT-LICENSE for details
+
 -module(hitori).
 -export([
+	%% Standard solving and generation functions
+	%% generate/1 doesn't work too well for anything above 4. Apparently completely random doesn't lend itself to solveability. 
 	generate/1,
 	solve/1,
-	blacken_coord/3,
-	row_list/2,
-	col_list/2,
-	find_duplicates_in_list/1,
-	find_offending_squares/1,
 	from_list/1,
-	render/1
-]).
+	render/1,
 
--compile(export_all).
+
+	puz8/0,
+	puz9/0,
+	puz12/0,
+	puz20/0
+]).
 
 %% Will be a list of lists (matrix) of tuples of the form {Number, black|white}
 generate(Size) ->
@@ -87,8 +93,9 @@ analyze_and_solve(Puz, Ineligible) ->
 	case find_offending_squares(Puz) of
 		[] -> Puz; %% No offending squares meens it's solved
 		Offenders -> 
-			io:format("Rows: ~s\r",[lists:duplicate(length(Puz)*length(Puz),32)]),
-			io:format("Rows: ~s\r",[lists:duplicate(length(Offenders),$.)]),
+%%			%% Reneable the following two lines to see status updates
+%%			io:format("Rows: ~s\r",[lists:duplicate(length(Puz)*length(Puz),32)]),
+%%			io:format("Rows: ~s\r",[lists:duplicate(length(Offenders),$.)]),
 			solve_worker(Puz, Offenders -- Ineligible, Ineligible)
 	end.
 
@@ -224,16 +231,12 @@ get_coord(Puz, X, Y) ->
 	_Square = lists:nth(Y, Xrow).
 
 
-
-row_list(Puz, N) ->
-	lists:nth(N, Puz).
-
 col_list(Puz, N) ->
 	[lists:nth(N, Row) || Row <- Puz].
 
 
 
-big() ->
+puz8() ->
 	Orig = [	5
 	,	5
 	,	6
@@ -306,7 +309,7 @@ squarify_list(List) ->
 		lists:sublist(List,N,Numrows)
 	end,lists:seq(1,length(List),Numrows)).
 
-big9() ->
+puz9() ->
 G = [
 	[7,5,2,8,4,2,5,6,8]
 	,[5,7,7,6,3,6,2,1,4]
@@ -320,7 +323,7 @@ G = [
 ],
 	from_list(G).
 
-bigger() ->
+puz12() ->
 	from_list(squarify_list(
 		[7
 	,		7
@@ -468,7 +471,7 @@ bigger() ->
 	,		9])).
 		
 
-huge() -> 
+puz20() -> 
 	Huge = [[12,11,14,13,10,8,20,10,18,6,18,10,3,1,6,15,5,10,9,1]
 	,[19,12,12,16,1,17,5,3,3,6,17,11,8,4,20,6,9,7,2,6]
 	,[16,20,8,2,5,6,17,11,9,1,8,8,7,12,4,4,14,18,10,16]
