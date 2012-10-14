@@ -3,15 +3,19 @@ A Hitori puzzle solver written in Erlang
 (c) 2012 Jesse Gumm
 Release under the MIT License
 
-## About
-
-This has been attempted on 12x12 and above and seems to take a long time. I haven't done a pile of optimizations.
-
-This will process an 8x8 grid in around 250ms
-
 ## Why
 
 Just for fun
+
+## Complexity and runspeed
+
+This is not the fastest algorithm in the world, but it's at least slightly smarter than brute force.
+
+It's basic run-time is O(N!) where N represents the number of "offending squares" (squares which are
+potentially necessary to make black to solve). Speeding up the algorithm depends largely on determining
+a better mechanism to find a proper "mark black", such as marking squares that *must* be black. The current
+method of finding which squares to try first is basically any squares that are potentially black and are
+found in both a row and a column. Beyond that, no intelligence is used to speed up the process.
 
 ## Usage
 
